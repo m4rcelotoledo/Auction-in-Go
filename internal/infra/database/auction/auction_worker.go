@@ -2,6 +2,8 @@ package auction
 
 import (
 	"context"
+	"fmt"
+	"os"
 	"time"
 
 	"github.com/m4rcelotoledo/Auction-in-Go/configuration/logger"
@@ -86,8 +88,16 @@ func (ar *AuctionRepository) closeAuction(ctx context.Context, auctionId string)
 func (ar *AuctionRepository) StartAuctionClosingWorker(ctx context.Context) {
 	logger.Info("Starting auction closing worker")
 
-	// Check interval (1 minute)
+	// Check interval (1 minute) - can be overridden for tests
 	checkInterval := 1 * time.Minute
+
+	// For tests, use a smaller interval if the environment variable is defined
+	if testInterval := os.Getenv("WORKER_CHECK_INTERVAL"); testInterval != "" {
+		if parsedInterval, err := time.ParseDuration(testInterval); err == nil {
+			checkInterval = parsedInterval
+			logger.Info("Worker using test interval", zap.String("interval", testInterval))
+		}
+	}
 
 	for {
 		select {
@@ -102,6 +112,9 @@ func (ar *AuctionRepository) StartAuctionClosingWorker(ctx context.Context) {
 				time.Sleep(checkInterval)
 				continue
 			}
+
+			// Logs for debug
+			logger.Info("Worker check", zap.String("expiredAuctionsFound", fmt.Sprintf("%d", len(expiredAuctions))))
 
 			// Close expired auctions
 			for _, auction := range expiredAuctions {

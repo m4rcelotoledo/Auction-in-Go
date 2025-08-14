@@ -30,6 +30,7 @@ func (ar *AuctionRepository) FindAuctionById(
 		Condition:   auctionEntityMongo.Condition,
 		Status:      auctionEntityMongo.Status,
 		Timestamp:   time.Unix(auctionEntityMongo.Timestamp, 0),
+		EndTime:     time.Unix(auctionEntityMongo.EndTime, 0),
 	}, nil
 }
 
@@ -75,6 +76,7 @@ func (repo *AuctionRepository) FindAuctions(
 			Description: auction.Description,
 			Condition:   auction.Condition,
 			Timestamp:   time.Unix(auction.Timestamp, 0),
+			EndTime:     time.Unix(auction.EndTime, 0),
 		})
 	}
 

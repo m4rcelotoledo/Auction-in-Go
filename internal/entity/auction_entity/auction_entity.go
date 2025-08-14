@@ -48,12 +48,20 @@ func CreateAuction(
 }
 
 func (au *Auction) Validate() *internal_error.InternalError {
-	if len(au.ProductName) <= 1 ||
-		len(au.Category) <= 2 ||
-		len(au.Description) <= 10 && (au.Condition != New &&
-			au.Condition != Refurbished &&
-			au.Condition != Used) {
-		return internal_error.NewBadRequestError("invalid auction object")
+	if len(au.ProductName) <= 1 {
+		return internal_error.NewBadRequestError("product name must be longer than 1 character")
+	}
+
+	if len(au.Category) <= 2 {
+		return internal_error.NewBadRequestError("category must be longer than 2 characters")
+	}
+
+	if len(au.Description) <= 10 {
+		return internal_error.NewBadRequestError("description must be longer than 10 characters")
+	}
+
+	if au.Condition != New && au.Condition != Refurbished && au.Condition != Used {
+		return internal_error.NewBadRequestError("invalid product condition")
 	}
 
 	return nil
