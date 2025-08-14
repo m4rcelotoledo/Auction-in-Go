@@ -2,11 +2,29 @@ package auction_entity
 
 import (
 	"context"
+	"os"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/m4rcelotoledo/Auction-in-Go/internal/internal_error"
 )
+
+// calculateEndTime calculates the expiration time of the auction based on the AUCTION_DURATION environment variable
+func calculateEndTime() time.Time {
+	durationStr := os.Getenv("AUCTION_DURATION")
+	if durationStr == "" {
+		// Default to 5 minutes if the environment variable is not defined
+		durationStr = "5m"
+	}
+
+	duration, err := time.ParseDuration(durationStr)
+	if err != nil {
+		// If there is an error parsing, use 5 minutes as fallback
+		duration = 5 * time.Minute
+	}
+
+	return time.Now().Add(duration)
+}
 
 func CreateAuction(
 	productName, category, description string,
@@ -19,6 +37,7 @@ func CreateAuction(
 		Condition:   condition,
 		Status:      Active,
 		Timestamp:   time.Now(),
+		EndTime:     calculateEndTime(),
 	}
 
 	if err := auction.Validate(); err != nil {
@@ -48,6 +67,7 @@ type Auction struct {
 	Condition   ProductCondition
 	Status      AuctionStatus
 	Timestamp   time.Time
+	EndTime     time.Time
 }
 
 type ProductCondition int
